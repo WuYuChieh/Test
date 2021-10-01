@@ -52,10 +52,9 @@ function init () {
 	cube = new THREE.Mesh (cubeGeometry, cubeMaterial);
 	scene.add (cube);
 	
-	var cylinderGeometry = new THREE.CylinderGeometry (2, 2, 1, 4);
+	var cylinderGeometry = new THREE.CylinderGeometry (5, 5, 2, 32);
 	var cylinderMaterial = new THREE.MeshNormalMaterial();
 	cylinder = new THREE.Mesh (cylinderGeometry, cylinderMaterial);
-	cylinder.position.set (5, 0);
 	scene.add (cylinder);
 		
 }
