@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#info {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  padding: absolute;
+  text-align: center;
+  font-size: 10px;
+  color: #000000
+}
+
+#toggle {
+  top: 1px;
+  width: 10%;
+  padding: 5px;
+  font-size: 2px;
+  color: green
+}
+
+#restart {
+  position: left;
+  top: 1px;
+  width: 15%;
+  padding: 5px;
+  text-align: center;
+  font-size: 2px;
+  color: blue
+}
+
+body {
+  overflow: hidden
+}
+</style>
+</head>
+<body>
+
+<div id="info">
+  <h1>Homework 1 - Clock</h1>
+  <button id="timeSet10">+10</button>
+  <button id="timeSet1">+1</button>
+  <button id="toggle">Start</button>
+  <button id="restart">Restart</button>
+</div>
+<script src="https://threejs.org/build/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script>
+var renderer, scene, camera;
+var clockface, pointer, dt;
+var angle = 0,
+  clock;
+var startTurn = false,
+  restartTurn = false,
+  setTime10 = false,
+  setTime1 = false;
+
+$(`#toggle`).click(function() {
+  startTurn = !startTurn;
+})
+$(`#restart`).click(function() {
+  restartTurn = !restartTurn;
+})
+$(`#timeSet10`).click(function() {
+  setTime10 = !setTime10;
+})
+$(`#timeSet1`).click(function() {
+  setTime1 = !setTime1;
+})
+
+
+init();
+animate();
+
+function init() {
+
+  renderer = new THREE.WebGLRenderer();
+  document.body.appendChild(renderer.domElement);
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  renderer.setSize(width, height);
+
+  renderer.setClearColor(0x9FE2BF);
+
+  scene = new THREE.Scene();
+  var grid = new THREE.GridHelper(20, 20, 0xaaaa00, 0x333333);
+  //scene.add (grid);
+  //var axes = new THREE.AxesHelper (5);
+  //scene.add (axes);
+
+  camera = new THREE.PerspectiveCamera(35, width / height, 1, 100);
+  camera.position.z = 40;
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+  let controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  window.addEventListener('resize', onWindowResize, false);
+  /////////////////////////////////
+
+  pointer = new THREE.Mesh(new THREE.CircleGeometry(0.5, 32), new THREE.MeshBasicMaterial({
+    color: 0x40E0D0
+  }));
+  clockface = new THREE.Mesh(new THREE.CircleGeometry(5, 32), new THREE.MeshBasicMaterial({
+    color: 0xCCCCFF
+  }));
+  pointer.position.set(0, 4, 0.1);
+  scene.add(pointer);
+  scene.add(clockface);
+
+  clock = new THREE.Clock();
+  clock.getDelta();
+
+
+}
+
+function onWindowResize() {
+
+  var width = window.autoWidth;
+  var height = window.autoHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+
+}
+
+function animate() {
+
+  dt = clock.getDelta();
+
+  if (restartTurn) {
+    restartTurn = !restartTurn;
+    startTurn = false;
+    angle = 0;
+    pointer.position.set(0, 4, 0.1);
+  }
+
+  if (setTime10) {
+    angle += 2 * Math.PI / 6;
+    setTime10 = false;
+  }
+
+  if (setTime1) {
+    angle += 2 * Math.PI / 60;
+    setTime1 = false;
+  }
+
+  if (startTurn) {
+    angle -= 2 * Math.PI * dt / 60;
+  }
+
+  pointer.position.set(4 * Math.sin(angle), 4 * Math.cos(angle), 0.1);
+  requestAnimationFrame(animate);
+  render();
+
+}
+
+function render() {
+
+  renderer.render(scene, camera);
+
+}
+
+</script>
+
+</body>
+</html>
