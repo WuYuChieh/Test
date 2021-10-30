@@ -3,74 +3,108 @@
 <head>
 <style>
 #info {
-  position: absolute;
-  top: 10px;
-  width: 100%;
-  padding: absolute;
-  text-align: center;
-  font-size: 10px;
-  color: #000000
+	position: absolute;
+	top: 10px;
+	width: 100%;
+	padding: absolute;
+	text-align: center;
+	font-size: 10px;
+	color: #000000
 }
 
-#toggle {
-  top: 1px;
-  width: 10%;
-  padding: 5px;
-  font-size: 2px;
-  color: green
+.Button {
+	top: 1px;
+	height: 25px;
+	width: auto;
+	background-color: #E6E6FA;
 }
 
-#restart {
-  position: left;
-  top: 1px;
-  width: 15%;
-  padding: 5px;
-  text-align: center;
-  font-size: 2px;
-  color: blue
+.start {
+	border-radius: 50%;
+	width: 50px;
+	padding: 5px;
+	font-size: 2px;
+	color: green
+}
+
+.reset {	
+	border-radius: 50%;
+	width: 50px;
+	padding: 5px;
+	font-size: 2px;
+	color: blue
 }
 
 body {
-  overflow: hidden
+	overflow: hidden
 }
 </style>
 </head>
 <body>
 
-<div id="info">
-  <h1>Homework 1 - Clock</h1>
-  <button id="timeSet10">+10</button>
-  <button id="timeSet1">+1</button>
-  <button id="toggle">Start</button>
-  <button id="restart">Restart</button>
+<audio id=ring>
+  <source src="ring.mp3" type="audio/mpeg">
+</audio>
+
+<div id=info>
+	<h1 style="color: #8B00FF">Homework 1 - Clock Timer</h1>
+	<button id=timeSetPlus10 class="Button" style="border-radius: 50%; width: 50px; color: white; background-color: green;">+10</button>
+	<button id=timeSetSub10 class="Button" style="border-radius: 50%; width: 50px; color: white; background-color: red;">-10</button>
+	<button id=start class="Button start">Start</button>
+	<button id=reset class="Button reset">Reset</button>
+	<button id=quarzt class="Button" style="border-radius: 50%; width: 100px; color: purple">Quarzt Style</button>
 </div>
+
 <script src="https://threejs.org/build/three.min.js"></script>
 <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 
 <script>
+window.onmousedown = function(e) {
+	if (pressed[e.which]) return;
+	pressed[e.which] = e.timeStamp;
+};
+
+window.onmouseup = function(e) {
+	if (!pressed[e.which]) return;
+	duration = (e.timeStamp - pressed[e.which]) / 1000;
+	pressed[e.which] = 0;
+};
+
 var renderer, scene, camera;
 var clockface, pointer, dt;
-var angle = 0,
-  clock;
-var startTurn = false,
-  restartTurn = false,
-  setTime10 = false,
-  setTime1 = false;
+var angle = 0, duration, count = 0, clock;
+var startTurn = false, 
+	resetTurn = false, 
+	setTimePlus10 = false, 
+	setTimeSub10 = false, 
+	quar = false,
+	longReset = false;
+	ringing = false;
+var pressed = {};
 
-$(`#toggle`).click(function() {
+$(`#start`).click(function() {
   startTurn = !startTurn;
+  if (startTurn)
+    $("#start").text ('Stop');
+  else
+	$("#start").text ('Start');
 })
-$(`#restart`).click(function() {
-  restartTurn = !restartTurn;
+$(`#reset`).click(function() {
+  resetTurn = !resetTurn;
 })
-$(`#timeSet10`).click(function() {
-  setTime10 = !setTime10;
+$(`#timeSetPlus10`).click(function() {
+  setTimePlus10 = !setTimePlus10;
 })
-$(`#timeSet1`).click(function() {
-  setTime1 = !setTime1;
+$(`#timeSetSub10`).click(function() {
+  setTimeSub10 = !setTimeSub10;
 })
-
+$(`#quarzt`).click(function() {
+  quar = !quar;
+  if (quar) {
+    quarztStyle();
+  }
+})
 
 init();
 animate();
@@ -83,75 +117,143 @@ function init() {
   var height = window.innerHeight;
   renderer.setSize(width, height);
 
-  renderer.setClearColor(0x9FE2BF);
+  renderer.setClearColor(0xE6E6FA);
 
   scene = new THREE.Scene();
-  var grid = new THREE.GridHelper(20, 20, 0xaaaa00, 0x333333);
+  //var grid = new THREE.GridHelper(20, 20, 0xaaaa00, 0x333333);
   //scene.add (grid);
   //var axes = new THREE.AxesHelper (5);
   //scene.add (axes);
 
   camera = new THREE.PerspectiveCamera(35, width / height, 1, 100);
-  camera.position.z = 40;
+  camera.position.z = 30;
   camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-  let controls = new THREE.OrbitControls(camera, renderer.domElement);
+  //let controls = new THREE.OrbitControls(camera, renderer.domElement);
 
   window.addEventListener('resize', onWindowResize, false);
   /////////////////////////////////
+  needleGroup = new THREE.Group();
+  
+  center = new THREE.Mesh(new THREE.DodecahedronGeometry(0.2, 10), new THREE.MeshBasicMaterial({
+    color: 0x8B00FF
+  })) 
+  needleGroup.add(center);
+  
+  pointer = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 5.5, 30), new THREE.MeshBasicMaterial({
+    color: 0x8B00FF
+  }));
+  pointer.position.set(0, 2.75, 0);
+  needleGroup.add(pointer);
+  
+  pointerHead = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.5, 32), new THREE.MeshBasicMaterial({
+    color: 0x8B00FF
+  }))
+  pointerHead.position.set(0, 5.5, 0);
+  needleGroup.add(pointerHead);
+  
+  clockface = new THREE.Mesh(new THREE.CircleGeometry(6, 32), new THREE.MeshBasicMaterial({
+    color: 0xCCCCFF,
+	side: THREE.DoubleSide
+  }));
+  
 
-  pointer = new THREE.Mesh(new THREE.CircleGeometry(0.5, 32), new THREE.MeshBasicMaterial({
-    color: 0x40E0D0
-  }));
-  clockface = new THREE.Mesh(new THREE.CircleGeometry(5, 32), new THREE.MeshBasicMaterial({
-    color: 0xCCCCFF
-  }));
-  pointer.position.set(0, 4, 0.1);
-  scene.add(pointer);
-  scene.add(clockface);
+  scene.add(clockface, needleGroup);
 
   clock = new THREE.Clock();
   clock.getDelta();
-
-
 }
 
 function onWindowResize() {
 
-  var width = window.autoWidth;
-  var height = window.autoHeight;
+  var width = window.innerWidth;
+  var height = window.innerHeight;
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
+}
 
+function quarztStyle() {
+  if (!quar)
+    return;
+  if (angle<0) {
+    angle = 0;
+    return;
+  }
+  if (startTurn) {
+    angle -= 2 * Math.PI / 60;
+  }
+  //pointer.position.set(5.3 * Math.sin(angle), 5.3 * Math.cos(angle), 0.1);
+  needleGroup.rotation.z = -angle;
+  setTimeout("quarztStyle()", 1000);
+}
+
+function longPushReset() {
+	startTurn = false;
+	angle = 0;
+	quar = false;
+	$("#start").text ('Start');
+	ring.load();
+	return;
 }
 
 function animate() {
 
   dt = clock.getDelta();
 
-  if (restartTurn) {
-    restartTurn = !restartTurn;
+  if (resetTurn) {
+    resetTurn = !resetTurn;
     startTurn = false;
+	quar = false;
     angle = 0;
-    pointer.position.set(0, 4, 0.1);
+	$("#start").text ('Start');
+	ring.load();
   }
 
-  if (setTime10) {
+  if (setTimePlus10) {
     angle += 2 * Math.PI / 6;
-    setTime10 = false;
+    setTimePlus10 = false;
   }
-
-  if (setTime1) {
-    angle += 2 * Math.PI / 60;
-    setTime1 = false;
+  
+  if (setTimeSub10) {
+    angle -= 2 * Math.PI / 6;
+    setTimeSub10 = false;
   }
-
+  
+  if (angle<=0 && startTurn) {
+	startTurn = !startTurn;
+	angle = 0;
+	$("#start").text ('Start');
+	//setTimeout("alert('Time-up!')", 300);
+	ringing = !ringing;
+  }  
+  
+  if (ringing) {
+	for (var count=1; count <=20; count++){
+		setTimeout(function() {
+			ring.play();
+		}, count*500);
+	}
+	ringing = false;
+}
+  
+  if (quar)
+    $("#quarzt").text ('Sector');
+  else
+	$("#quarzt").text ('Quarzt Style');
+  
   if (startTurn) {
-    angle -= 2 * Math.PI * dt / 60;
+	if (!quar){
+	  angle -= 2 * Math.PI * dt / 60;
+	}
   }
-
-  pointer.position.set(4 * Math.sin(angle), 4 * Math.cos(angle), 0.1);
+  
+  if (duration > 2) {
+	longPushReset();
+  }
+  
+  //pointer.position.set(5.3 * Math.sin(angle), 5.3 * Math.cos(angle), 0.1);
+  needleGroup.rotation.z = -angle;
   requestAnimationFrame(animate);
   render();
 
