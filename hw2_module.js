@@ -1,3 +1,99 @@
+function buildCar() {
+
+	var ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshBasicMaterial({
+	color: 0x00ad5f,
+	side: THREE.DoubleSide
+	}));
+	ground.rotation.x = Math.PI / 2;
+	scene.add(ground);
+
+	const light = new THREE.PointLight("white");
+	light.position.set(50, 50, 50);
+	scene.add(light);
+
+
+	var windscreen = new THREE.Mesh(new THREE.PlaneGeometry(5, 4), new THREE.MeshPhongMaterial({
+		color: 0x82fcff,
+		side: THREE.DoubleSide
+	}));
+	windscreen.position.set(6.1, 7.5, 0);
+	windscreen.rotation.y = Math.PI / 2;
+
+	var licensePlate = new THREE.Mesh(new THREE.PlaneGeometry(5, 2), new THREE.MeshPhongMaterial({
+		color: "white",
+		side: THREE.DoubleSide
+	}));
+	licensePlate.position.set(-7.6, 2, 0);
+	licensePlate.rotation.y = Math.PI / 2;
+
+	var carBody = new THREE.Mesh(new THREE.BoxGeometry(15, 5, 10), new THREE.MeshPhongMaterial({
+		color: 0x0058a1,
+		shininess: 100
+	}));
+	carBody.position.set(0, 2.5, 0);
+
+	var carHead = new THREE.Mesh(new THREE.BoxGeometry(12, 5, 7), new THREE.MeshPhongMaterial({
+		color: 0x006bfa,
+		shininess: 100
+	}));
+	carHead.position.set(0, 7.5, 0);
+
+	var smokesTack = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 2, 32), new THREE.MeshPhongMaterial({
+		color: 0x97CBFF
+	}));
+	smokesTack.position.set(3, 11, 0);
+
+	var lightLeft = new THREE.Mesh(new THREE.CircleGeometry(1, 30), new THREE.MeshPhongMaterial({
+		color: 0xffed80,
+		side: THREE.DoubleSide
+	}));
+	lightLeft.position.set(7.6, 3.5, -2.5);
+	lightLeft.rotation.y = Math.PI / 2;
+	var lightRight = lightLeft.clone();
+	lightRight.position.set(7.6, 3.5, 2.5);
+	lightRight.rotation.y = Math.PI / 2;
+
+	car.add(windscreen, licensePlate, carBody, carHead, smokesTack, lightLeft, lightRight);
+	
+	
+	obstacles = new THREE.Object3D();
+	obstacle0 = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 3, 32), new THREE.MeshPhongMaterial({
+		color: 0x009100
+	}));
+	obstacle0.position.set(90, 1.5, -50);
+	obstacle1 = obstacle0.clone();
+	obstacle1.position.set(55, 1.5, -20);
+	obstacle2 = obstacle0.clone();
+	obstacle2.position.set(70, 1.5, 30);
+	obstacle3 = obstacle0.clone();
+	obstacle3.position.set(-50, 1.5, 40);
+	obstacle4 = obstacle0.clone();
+	obstacle4.position.set(-60, 1.5, -80);
+	
+	obstacles.add(obstacle0, obstacle1, obstacle2, obstacle3, obstacle4);/**/
+	
+	scene.add(car, obstacles);
+}
+
+function init1() {
+	scene1 = new THREE.Scene();
+	camera1 = new THREE.OrthographicCamera(-10.01, 10.01, 10.01, -10.01, -10, 10);
+	camera1.position.z = 5;
+	
+	let sideLines = [];
+	sideLines.push(new THREE.Vector3(-10, -10, 0),
+    new THREE.Vector3(10, -10, 0),
+    new THREE.Vector3(10, 10, 0),
+    new THREE.Vector3(-10, 10, 0),
+    new THREE.Vector3(-10, -10, 0));
+	
+	var lineGeometry = new THREE.BufferGeometry().setFromPoints(sideLines);
+	var line = new THREE.Line(lineGeometry, new THREE.LineDashedMaterial({
+		color: 0x004B97
+	}));
+	scene1.add(line);
+}
+
 function update(dt) {
 
 	keyboard.update();
@@ -28,7 +124,7 @@ function update(dt) {
 	// compute force (Go forward)
 	if (power >= 0.00) {
 		var thrust = new THREE.Vector3(1,0,0).multiplyScalar(power).applyAxisAngle(new THREE.Vector3(0,1,0), angle_thrust);
-		force.copy (thrust);
+		force.copy(thrust);
 		force.add(vel.clone().multiplyScalar(-2));
 
 	// eulers
@@ -39,7 +135,7 @@ function update(dt) {
 	// compute force (Go back)
 	if (power <= -0.00) {
 		var thrust = new THREE.Vector3(1,0,0).multiplyScalar(-power).applyAxisAngle(new THREE.Vector3(0,1,0), angle_thrust);
-		force.copy (thrust);
+		force.copy(thrust);
 		force.add(vel.clone().multiplyScalar(-2));
 
 	// eulers

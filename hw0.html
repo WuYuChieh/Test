@@ -56,7 +56,6 @@ function init () {
 	var cylinderMaterial = new THREE.MeshNormalMaterial();
 	cylinder = new THREE.Mesh (cylinderGeometry, cylinderMaterial);
 	scene.add (cylinder);
-		
 }
 
 function onWindowResize() {
@@ -66,14 +65,12 @@ function onWindowResize() {
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
-	
 }
 
 function animate() {
 	
 	requestAnimationFrame(animate);
 	render();
-	
 }
 
 function render() {

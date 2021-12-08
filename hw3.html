@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#info {
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	padding: 10px;
+	text-align: center;
+	color: #87cefa;
+}
+
+.infoOfView {
+	position: absolute;
+	bottom: 8px;
+	padding: 10px 15px 10px;
+	color: white; 
+	text-shadow: 2px 2px 4px #000000;
+	font-size: 25px;
+}
+
+.Button {
+	top: 1px;
+	height: 30px;
+	width: 100px;
+	background-color: #87cefa;
+}
+
+body {
+	overflow: hidden;
+}
+</style>
+</head>
+<body>
+<div id="info">
+	<h1>Homework 3 - Modeling, Multiple Viewports
+		<button id=toggleViewSize class="Button" style="border-radius: 50%; color: #0000cd;">Enlarge</button>
+	</h1>
+</div>
+
+<script src="https://threejs.org/build/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+
+<script>
+var camera, scene0, renderer, scene1, sceneFull, cameraFull;
+var cameraFront, cameraTop, cameraSide;
+var viewToggle = false, viewSize = false;
+var modules;
+
+$(`#toggleViewSize`).click(function() {
+	viewSize = !viewSize;
+	if (viewSize) {
+		$("#toggleViewSize").text ('Narrow');
+	}
+	else {
+		$("#toggleViewSize").text ('Enlarge');
+	}
+})
+
+init();
+animate();
+
+function init1() {
+	sceneFull = new THREE.Scene();
+	cameraFull = new THREE.OrthographicCamera(-10.01, 10.01, 10.01, -10.01, -10, 10);
+	cameraFull.position.z = 5;
+	
+	let sideLines = [];
+	sideLines.push(new THREE.Vector3(-10, -10, 0),
+    new THREE.Vector3(10, -10, 0),
+    new THREE.Vector3(10, 10, 0),
+    new THREE.Vector3(-10, 10, 0),
+    new THREE.Vector3(-10, -10, 0));
+	
+	var lineGeometry = new THREE.BufferGeometry().setFromPoints(sideLines);
+	var line = new THREE.Line(lineGeometry, new THREE.LineDashedMaterial({
+		color: 0x000080
+	}));
+	sceneFull.add(line);
+}
+
+function init() {
+
+	modules = new THREE.Group();
+
+	renderer = new THREE.WebGLRenderer();
+	document.body.appendChild(renderer.domElement);
+	var width = window.innerWidth;
+	var height = window.innerHeight;
+	renderer.setSize(width, height);
+
+	renderer.setClearColor(0x4169e1);
+
+	scene0 = new THREE.Scene();
+	var grid = new THREE.GridHelper(200, 20, 'red', 'white');
+	//scene0.add(grid);
+	var axes = new THREE.AxesHelper(5);
+	//scene0.add(axes);
+
+	camera = new THREE.PerspectiveCamera(35, width / height, 1, 10000);
+	camera.position.set(200, 150, 220);
+	camera.lookAt(new THREE.Vector3(0, 0, 0));
+	
+	cameraFront = new THREE.OrthographicCamera(-70, 70, 60, -60, 1, 100);
+	cameraFront.position.set(0, 20, 50);
+	cameraFront.lookAt(0, 20, 0);
+	
+	cameraTop = new THREE.OrthographicCamera(-70, 70, 60, -60, 1, 100);
+	cameraTop.position.set(0, 50, 0);
+	cameraTop.up.set(0, 0, -1);
+	cameraTop.lookAt(0, 0, 0);
+	
+	cameraSide = new THREE.OrthographicCamera(-70, 70, 60, -60, -100, 100);
+	cameraSide.position.set(50, 20, 0);
+	cameraSide.lookAt(0, 20, 0);
+	
+	let controls = new THREE.OrbitControls(camera, renderer.domElement);
+	
+	controls.enableKeys = false;
+	renderer.autoClear = false;
+
+	window.addEventListener('resize', onWindowResize, false);
+	////////////////////////////////////////////////////////////////
+	const light = new THREE.PointLight("white", 1.4);
+	light.position.set(70, 70, 70);
+	scene0.add(light);
+	
+	var box0 = new THREE.Mesh(new THREE.BoxGeometry(60, 25, 60), new THREE.MeshPhongMaterial({
+		color: 0xc0c0c0,
+		shininess: 100
+	}));
+	var box1 = new THREE.Mesh(new THREE.BoxGeometry(13, 50, 15), new THREE.MeshPhongMaterial({
+		color: 0xc0c0c0,
+		shininess: 100
+	}));
+	box1.position.set(-23.5, 13.5, 22.5);
+	var box2 = box1.clone();
+	box2.position.set(-23.5, 13.5, -22.5);
+	var box3 = box1.clone();
+	box3.position.set(23.5, 13.5, -22.5);
+	var box4 = box1.clone();
+	box4.position.set(23.5, 13.5, 22.5);
+	var box5 = new THREE.Mesh(new THREE.BoxGeometry(13, 30, 60), new THREE.MeshPhongMaterial({
+		color: 0xc0c0c0,
+		shininess: 100
+	}));
+	box5.position.set(-23.5, 2.5, 0);
+	var box6 = box5.clone();
+	box6.position.set(23.5, 2.5, 0);
+	
+	var shape0 = new THREE.Shape();
+	shape0.moveTo(0, 0);
+	shape0.lineTo(0, 25);
+	shape0.absarc(5, 25, 5, Math.PI, Math.PI*1.5);
+	shape0.lineTo(5, 0);
+	shape0.lineTo(0, 0);
+	
+	var shape0Settings = {
+		steps: 1,
+		depth: 60,
+		bevelEnabled: false,
+		curveSegments: 200
+	};
+	
+	var geometry0 = new THREE.Mesh(new THREE.ExtrudeGeometry(shape0, shape0Settings), new THREE.MeshPhongMaterial({
+		color: 0xc0c0c0,
+		shininess: 100,
+	}));
+	geometry0.position.set(30, -12.5, -30);
+	
+	var shape1 = new THREE.Shape();
+	shape1.moveTo(0, 0);
+	shape1.lineTo(35, 0);
+	shape1.absarc(35, 30, 30, Math.PI*1.5, Math.PI*0.5);	
+	shape1.lineTo(0, 60);	
+	shape1.lineTo(0, 0);	
+	
+	var path = new THREE.Path();
+	path.moveTo(35, 30);
+	path.absarc(35, 30, 10, 0, Math.PI*2);
+	shape1.holes.push(path);
+	
+	var shape1Settings = {
+		steps: 1,
+		depth: 20,
+		bevelEnabled: false,
+		curveSegments: 200
+	};
+	
+	var geometry1 = new THREE.Mesh(new THREE.ExtrudeGeometry(shape1, shape1Settings), new THREE.MeshPhongMaterial({
+		color: 0xc0c0c0,
+		shininess: 100,
+	}));
+	geometry1.rotation.x = -Math.PI / 2;
+	geometry1.position.set(35, -12.5, 30);	
+	
+	modules.add(box0, box1, box2, box3, box4, box5, box6, geometry0, geometry1);
+	modules.position.set(-35, 12.5, 0);
+	
+	scene0.add(modules);
+	scene1 = scene0.clone();
+	scene1.add(grid);
+	init1();
+}
+
+function onWindowResize() {
+
+	var width = window.innerWidth;
+	var height = window.innerHeight;
+	camera.aspect = width / height;
+	camera.updateProjectionMatrix();
+	renderer.setSize(width, height);
+}
+
+function animate() {
+	
+	requestAnimationFrame(animate);
+	render();
+}
+
+function render() {
+
+	var WW = window.innerWidth;
+	var HH = window.innerHeight;
+
+	renderer.clear();
+	if (viewSize) {
+		renderer.setViewport(5, 5, WW - 10, HH - 110);
+		camera.aspect = WW / 2 / HH;
+		camera.updateProjectionMatrix();
+		renderer.render(scene1, camera);
+	}
+	else {
+		renderer.setViewport(WW / 2 + 5, (HH-100) / 2 + 5, WW / 2 - 5, (HH-100) / 2 - 5);
+		camera.aspect = WW / 2 / HH;
+		camera.updateProjectionMatrix();
+		renderer.render(scene1, camera);
+		renderer.render(sceneFull, cameraFull);
+
+		renderer.setViewport(WW / 2 + 5, 5, WW / 2 - 5, (HH-100) / 2 - 5);
+		renderer.render(scene0, cameraSide);
+		renderer.render(sceneFull, cameraFull);
+
+		renderer.setViewport(5, (HH-100) / 2 + 5, WW / 2 - 5, (HH-100) / 2 - 5);
+		renderer.render(scene0, cameraTop);
+		renderer.render(sceneFull, cameraFull);
+
+		renderer.setViewport(5, 5, WW / 2 - 5, (HH-100) / 2 - 5);
+		renderer.render(scene0, cameraFront);
+		renderer.render(sceneFull, cameraFull);
+	}
+}
+</script>
+
+</body>
+</html>
