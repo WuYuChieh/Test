@@ -30,9 +30,6 @@ body {
 </style>
 </head>
 <body>
-<audio id=ring auto loop>
-  <source src="ring.mp3" type="audio/mpeg">
-</audio>
 <div id="info">
 	<h1>Homework 2 - Dynamic Drive, Rectangle-Circle Intersection, Dual Viewports</h1>
 </div>
@@ -127,9 +124,6 @@ function animate() {
 	if (Check_Intersect(boundary, obstacle0, 5) || Check_Intersect(boundary, obstacle1, 5) || 
 		Check_Intersect(boundary, obstacle2, 5) || Check_Intersect(boundary, obstacle3, 5) || Check_Intersect(boundary, obstacle4, 5)) {
 		power = 0.01;
-		ring.play();
-	}else {
-		ring.load();
 	}
 	
 	requestAnimationFrame(animate);
