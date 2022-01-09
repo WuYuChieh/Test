@@ -4,8 +4,7 @@ import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitCo
 import { Candle } from './hw4_class.js';
 
 var camera, scene, renderer;
-var raycaster, mouseLoc;
-var pickables = [], candles = [];
+var  candles = [];
 
 function init() {
 	
@@ -44,13 +43,7 @@ function init() {
 	var candle4 = new Candle(0, 40, 4);
 	var candle5 = new Candle(0, -40, 5);
 	candles.push(candle0, candle1, candle2, candle3, candle4, candle5);
-	pickables.push(candle0.candle, candle1.candle, candle2.candle, candle3.candle, candle4.candle, candle5.candle);
-	console.log(pickables);
 	scene.add(ground);
-	
-	raycaster = new THREE.Raycaster();
-	mouseLoc = new THREE.Vector2();
-	document.addEventListener ('pointerdown', doPointerDown, false);
 }
 
 function onWindowResize() {
@@ -60,27 +53,6 @@ function onWindowResize() {
 	camera.aspect = width / height;
 	camera.updateProjectionMatrix();
 	renderer.setSize(width, height);
-}
-
-function doPointerDown (event) {
-	
-	event.preventDefault();
-	
-	mouseLoc.x = (event.clientX / window.innerWidth) * 2 - 1;
-	mouseLoc.y = -(event.clientY / window.innerHeight) * 2 + 1;
-	
-	raycaster.setFromCamera (mouseLoc, camera);
-	var intersects = raycaster.intersectObjects (pickables);
-	
-	if (intersects.length > 0) {
-		
-	    console.log (intersects.length + ' picked ...');
-		console.log (intersects[0].object.name);
-		console.log (intersects[0].object.parent.parent.parent);
-
-	} else {
-		console.log ('nothing picked...');
-	}
 }
 
 function update(evt) {	///keyboard.ver///
