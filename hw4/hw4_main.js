@@ -4,7 +4,7 @@ import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitCo
 import { Candle } from './hw4_class.js';
 
 var camera, scene, renderer;
-var  candles = [];
+var candles = [];
 
 function init() {
 	
@@ -57,30 +57,18 @@ function onWindowResize() {
 
 function update(evt) {	///keyboard.ver///
 
-	if (evt.key == 1) {
-
+	if (evt.key == 1) 
 		candles[0].flameOut();
-	}
-	if (evt.key == 2) {
-
+	if (evt.key == 2) 
 		candles[1].flameOut();
-	}
-	if (evt.key == 3) {
-
+	if (evt.key == 3) 
 		candles[2].flameOut();
-	}
-	if (evt.key == 4) {
-
+	if (evt.key == 4) 
 		candles[3].flameOut();
-	}
-	if (evt.key == 5) {
-
+	if (evt.key == 5) 
 		candles[4].flameOut();
-	}
-	if (evt.key == 6) {
-
+	if (evt.key == 6) 
 		candles[5].flameOut();
-	}
 }
 
 function animate() {
