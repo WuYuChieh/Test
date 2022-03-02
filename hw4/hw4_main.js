@@ -1,6 +1,5 @@
-import * as THREE from "https://threejs.org/build/three.module.js";
-import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
-
+import * as THREE from 'three';
+import { OrbitControls } from 'controls';
 import { Candle } from './hw4_class.js';
 
 var camera, scene, renderer;

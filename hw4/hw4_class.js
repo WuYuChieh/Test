@@ -1,4 +1,4 @@
-import * as THREE from "https://threejs.org/build/three.module.js";
+import * as THREE from 'three';
 import {scene} from './hw4_main.js';
 
 class Candle {
